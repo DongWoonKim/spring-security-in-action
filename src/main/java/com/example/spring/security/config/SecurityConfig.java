@@ -1,34 +1,49 @@
 package com.example.spring.security.config;
 
+import com.example.spring.security.model.User;
+import com.example.spring.security.service.InMemoryUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final CustomAuthenticationProvider authenticationProvider;
+//    private final CustomAuthenticationProvider authenticationProvider;
+
+//    @Bean
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http
+//                .authorizeHttpRequests(authorizeRequests ->
+//                        authorizeRequests
+//                                .anyRequest().authenticated()
+//                )
+//                .httpBasic(Customizer.withDefaults());
+//
+//        http.authenticationProvider(authenticationProvider);
+//
+//        return http.build();
+//    }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests(authorizeRequests ->
-                        authorizeRequests
-                                .anyRequest().authenticated()
-                )
-                .httpBasic(Customizer.withDefaults());
+    public UserDetailsService userDetailsService() {
+        UserDetails u = new User("john", "12345", "read");
+        List<UserDetails> users = List.of(u);
+        return new InMemoryUserDetailsService(users);
+    }
 
-        http.authenticationProvider(authenticationProvider);
-
-        return http.build();
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return NoOpPasswordEncoder.getInstance();
     }
 
 }
