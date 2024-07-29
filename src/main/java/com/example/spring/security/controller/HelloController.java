@@ -11,11 +11,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class HelloController {
 
     @GetMapping("/hello")
-    public String hello(Authentication authentication) {
-        return "Hello, " + authentication.getName() + "!";
+    public String hello(Authentication a) {
+//        SecurityContext context = SecurityContextHolder.getContext();
+//        Authentication a = context.getAuthentication();
+
+        return "Hello, " + a.getName() + "!";
     }
 
-    @GetMapping("/goodbye")
+    @GetMapping("/bye")
     @Async
     public void goodbye() {
         SecurityContext context = SecurityContextHolder.getContext();
