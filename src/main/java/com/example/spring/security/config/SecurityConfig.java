@@ -1,58 +1,43 @@
 package com.example.spring.security.config;
 
+import com.example.spring.security.handlers.CustomAuthenticationFailureHandler;
+import com.example.spring.security.handlers.CustomAuthenticationSuccessHandler;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.task.TaskExecutor;
-import org.springframework.scheduling.annotation.AsyncConfigurer;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
-import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
 import org.springframework.security.web.SecurityFilterChain;
 
 import javax.sql.DataSource;
-import java.util.HashMap;
-
-import static org.springframework.security.core.context.SecurityContextHolder.*;
 
 @Configuration
-//@EnableAsync
-//@EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private final CustomAuthenticationSuccessHandler authenticationSuccessHandler;
+    private final CustomAuthenticationFailureHandler authenticationFailureHandler;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http
-                .httpBasic(httpBasic -> {
-                    httpBasic
-                            .realmName("OTHER")
-                            .authenticationEntryPoint(new CustomEntryPoint());
-                })
+                .formLogin(form -> form
+                                .successHandler(authenticationSuccessHandler)
+                                .failureHandler(authenticationFailureHandler)
+                );
+
+        http
                 .authorizeHttpRequests(authorize -> authorize
                         .anyRequest().authenticated()
                 );
+
         return http.build();
     }
-
-//    @Bean
-//    public InitializingBean initializingBean() {
-//        return () -> SecurityContextHolder.setStrategyName(MODE_INHERITABLETHREADLOCAL);
-//    }
 
     @Bean
     public UserDetailsService userDetailsService(DataSource dataSource) {
