@@ -11,6 +11,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -21,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
+import org.springframework.security.web.SecurityFilterChain;
 
 import javax.sql.DataSource;
 import java.util.HashMap;
@@ -28,15 +30,29 @@ import java.util.HashMap;
 import static org.springframework.security.core.context.SecurityContextHolder.*;
 
 @Configuration
-@EnableAsync
+//@EnableAsync
 //@EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     @Bean
-    public InitializingBean initializingBean() {
-        return () -> SecurityContextHolder.setStrategyName(MODE_INHERITABLETHREADLOCAL);
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .httpBasic(httpBasic -> {
+                    httpBasic
+                            .realmName("OTHER")
+                            .authenticationEntryPoint(new CustomEntryPoint());
+                })
+                .authorizeHttpRequests(authorize -> authorize
+                        .anyRequest().authenticated()
+                );
+        return http.build();
     }
+
+//    @Bean
+//    public InitializingBean initializingBean() {
+//        return () -> SecurityContextHolder.setStrategyName(MODE_INHERITABLETHREADLOCAL);
+//    }
 
     @Bean
     public UserDetailsService userDetailsService(DataSource dataSource) {
