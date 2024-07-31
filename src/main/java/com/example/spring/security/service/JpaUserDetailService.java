@@ -3,7 +3,6 @@ package com.example.spring.security.service;
 import com.example.spring.security.entities.User;
 import com.example.spring.security.model.CustomUserDetails;
 import com.example.spring.security.repositories.UserRepository;
-import io.micrometer.observation.Observation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,7 +18,7 @@ public class JpaUserDetailService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public CustomUserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         Supplier<UsernameNotFoundException> s = () -> new UsernameNotFoundException("Problem during authentication!");
 
