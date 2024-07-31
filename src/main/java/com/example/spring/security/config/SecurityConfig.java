@@ -1,52 +1,27 @@
 package com.example.spring.security.config;
 
-import com.example.spring.security.handlers.CustomAuthenticationFailureHandler;
-import com.example.spring.security.handlers.CustomAuthenticationSuccessHandler;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
-import org.springframework.security.web.SecurityFilterChain;
-
-import javax.sql.DataSource;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
 
 @Configuration
-@RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final CustomAuthenticationSuccessHandler authenticationSuccessHandler;
-    private final CustomAuthenticationFailureHandler authenticationFailureHandler;
-
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
-        http
-                .formLogin(form -> form
-                                .successHandler(authenticationSuccessHandler)
-                                .failureHandler(authenticationFailureHandler)
-                );
-
-        http
-                .authorizeHttpRequests(authorize -> authorize
-                        .anyRequest().authenticated()
-                );
-
-        return http.build();
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public UserDetailsService userDetailsService(DataSource dataSource) {
-        return new JdbcUserDetailsManager(dataSource);
-    }
+    public SCryptPasswordEncoder scryptPasswordEncoder() {
+        int cpuCost = (int) Math.pow(2, 14); // CPU 비용 파라미터 (N)
+        int memoryCost = 8; // 메모리 비용 파라미터 (r)
+        int parallelization = 1; // 병렬화 파라미터 (p)
+        int keyLength = 32; // 키 길이
+        int saltLength = 16; // 솔트 길이
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return NoOpPasswordEncoder.getInstance();
+        return new SCryptPasswordEncoder(cpuCost, memoryCost, parallelization, keyLength, saltLength);
     }
 
 }
